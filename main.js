@@ -17,17 +17,18 @@ function clickBusy () {
   tray.setImage(BUSY_ICON)
   device.setColor('#FF0000')
 }
-function clickInitial () {
-  tray.setTitle('')
-  device.setColor('#0000ff')
-}
+
 app.on('ready', () => {
   tray = new Tray(AVAILABLE_ICON)
   device = new Luxafor()
-  clickInitial()
+  clickAvailable()
   const contextMenu = Menu.buildFromTemplate([
     {label: 'Available', type: 'radio', checked: true, click: clickAvailable},
-    {label: 'Busy', type: 'radio', click: clickBusy}
+    {label: 'Busy', type: 'radio', click: clickBusy},
+    {type: 'separator'},
+    {label: 'Settings'},
+    {type: 'separator'},
+    {label: 'Close', role: 'quit'}
   ])
   tray.setToolTip('This is my application.')
   tray.setContextMenu(contextMenu)
