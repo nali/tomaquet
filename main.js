@@ -30,3 +30,7 @@ app.on('ready', () => {
   tray.setToolTip('This is my application.')
   tray.setContextMenu(contextMenu)
 })
+
+app.on('quit', () => {
+  device.off()
+})
