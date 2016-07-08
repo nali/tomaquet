@@ -1,36 +1,31 @@
 const {app, Menu, Tray} = require('electron')
 var HID = require('node-hid');
 
-// const Luxafor = require('luxafor-api')
-//
-// const device = new Luxafor({
-//   defaults: {
-//     wave: {
-//       type: 2,
-//       speed: 100,
-//       repeat: 5
-//     }
-//   }
-// })
+const Luxafor = require('luxafor-api')
 
 let tray = null
-
+let device = null
 function clickAvailable () {
   tray.setTitle('available')
-  console.log('devices:', HID.devices());
-  // device.setColor('#FFF')
+  device.setColor('#00ff00')
 }
 
 function clickBusy () {
   tray.setTitle('busy')
-  // device.setColor('#FC0')
+  device.setColor('#FF0000')
+}
+function clickInitial () {
+  tray.setTitle('')
+  device.setColor('#0000ff')
 }
 app.on('ready', () => {
   tray = new Tray('tomato.png')
+  device = new Luxafor()
+  clickInitial()
   const contextMenu = Menu.buildFromTemplate([
-    {label: 'Available', type: 'radio', checked: true, click: clickAvailable},
-    {label: 'Busy', type: 'radio', click: clickBusy},
-    {label: 'Unknown', type: 'radio', click() { tray.setTitle('') }}
+    {label: 'Initial', type: 'radio', checked: true, click: clickInitial},
+    {label: 'Available', type: 'radio', click: clickAvailable},
+    {label: 'Busy', type: 'radio', click: clickBusy}
   ])
   tray.setToolTip('This is my application.')
   tray.setContextMenu(contextMenu)
