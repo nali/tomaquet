@@ -51,3 +51,33 @@ app.on('activate', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+const path = require('path')
+const ipc = electron.ipcMain
+const Menu = electron.Menu
+const Tray = electron.Tray
+
+let appIcon = null
+
+ipc.on('put-in-tray', function (event) {
+  const iconName = 'tomato.png'
+  const iconPath = path.join(__dirname, iconName)
+  appIcon = new Tray(iconPath)
+  const contextMenu = Menu.buildFromTemplate([{
+    label: 'Remove',
+    click: function () {
+      event.sender.send('tray-removed')
+      appIcon.destroy()
+    }
+  }])
+  appIcon.setToolTip('Electron Demo in the tray.')
+  appIcon.setContextMenu(contextMenu)
+})
+
+ipc.on('remove-tray', function () {
+  appIcon.destroy()
+})
+
+app.on('window-all-closed', function () {
+  if (appIcon) appIcon.destroy()
+})
