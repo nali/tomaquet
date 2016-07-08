@@ -11,11 +11,16 @@ let device = null
 
 const countDownTimer = new Timer({
   direction: 'down',
-  startValue: '1:00'
+  startValue: '25:00',
+  interval: 1000
 })
 
 countDownTimer.on('change', (remainingTime) => {
   tray.setTitle(remainingTime)
+
+  if (remainingTime === '0:00') {
+    clickAvailable()
+  }
 })
 
 function clickAvailable () {
@@ -53,7 +58,7 @@ app.on('ready', () => {
     {type: 'separator'},
     {label: 'Close', role: 'quit'}
   ])
-  tray.setToolTip('This is my application.')
+  tray.setToolTip('No em toquis els tomaquets!')
   tray.setContextMenu(contextMenu)
 })
 
