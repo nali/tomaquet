@@ -21,13 +21,22 @@ countDownTimer.on('change', (remainingTime) => {
 function clickAvailable () {
   tray.setImage(AVAILABLE_ICON)
   device.setColor('#00ff00')
-  countDownTimer.start()
 }
 
 function clickBusy () {
-  countDownTimer.stop()
   tray.setImage(BUSY_ICON)
   device.setColor('#FF0000')
+}
+
+function clickStartPomodoro () {
+  clickBusy()
+  countDownTimer.start()
+}
+
+function clickStopPomodoro () {
+  clickAvailable()
+  countDownTimer.stop()
+  tray.setTitle('')
 }
 
 app.on('ready', () => {
@@ -37,6 +46,8 @@ app.on('ready', () => {
   const contextMenu = Menu.buildFromTemplate([
     {label: 'Available', type: 'radio', checked: true, click: clickAvailable},
     {label: 'Busy', type: 'radio', click: clickBusy},
+    {label: 'Start Pomodoro', type: 'radio', click: clickStartPomodoro},
+    {label: 'Stop Pomodoro', type: 'radio', click: clickStopPomodoro},
     {type: 'separator'},
     {label: 'Settings'},
     {type: 'separator'},
