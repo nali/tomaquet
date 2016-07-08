@@ -27,6 +27,6 @@
   },
   "dependencies": {
     "luxafor-api": "^2.0.0",
-    "node-hid": "^0.5.1"
+    "time-counter": "^1.0.0"
   }
 }
