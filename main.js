@@ -1,16 +1,26 @@
 const {app, Menu, Tray} = require('electron')
-var HID = require('node-hid');
-
 const Luxafor = require('luxafor-api')
+const Timer = require('time-counter')
 
 let tray = null
 let device = null
+
+const countDownTimer = new Timer({
+  direction: 'down',
+  startValue: '1:00'
+})
+
+countDownTimer.on('change', (remainingTime) => {
+  tray.setTitle(remainingTime)
+})
+
 function clickAvailable () {
-  tray.setTitle('available')
   device.setColor('#00ff00')
+  countDownTimer.start()
 }
 
 function clickBusy () {
+  countDownTimer.stop()
   tray.setTitle('busy')
   device.setColor('#FF0000')
 }
