@@ -1,11 +1,11 @@
 const {app, Menu, Tray} = require('electron')
-const HID = require('node-hid')
 const AVAILABLE_ICON = 'assets/available.png'
 const BUSY_ICON = 'assets/busy.png'
 
 const Luxafor = require('luxafor-api')
 const Timer = require('time-counter')
 
+const INITIAL_ANIMATION_SPEED = 100
 let tray = null
 let device = null
 
@@ -44,9 +44,20 @@ function clickStopPomodoro () {
   tray.setTitle('')
 }
 
+function doInitialAnimation () {
+  const colors = ['#0000ff', '#00ff00', '#ff0000', '#0000ff', '#00ff00', '#ff0000']
+  colors.forEach((color, index) => {
+    console.log('INDEX', index)
+    setTimeout(() => {
+      device.wave(color, 1, 1, 1)
+    }, index * INITIAL_ANIMATION_SPEED)
+  })
+}
+
 app.on('ready', () => {
   tray = new Tray(AVAILABLE_ICON)
   device = new Luxafor()
+  doInitialAnimation()
   clickAvailable()
   const contextMenu = Menu.buildFromTemplate([
     {label: 'Available', type: 'radio', checked: true, click: clickAvailable},
