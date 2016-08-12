@@ -59,14 +59,33 @@ var availableColor = new Color('#00ff00')
 
 countDownTimer.on('change', (remainingTime) => {
   tray.setTitle(remainingTime)
-  var ratio = convertToSeconds(remainingTime) / convertToSeconds(POMODORO_TIME)
-  var newColor = busyColor.transitionTo(finishPomodoro, ratio)
-  device.setColor(newColor)
+  setTransitionLED(remainingTime)
   if (remainingTime === '0:00') {
     clickAvailable()
   }
 })
 
+function setTransitionLED (remainingTime) {
+  var ratio = convertToSeconds(remainingTime) / convertToSeconds(POMODORO_TIME)
+  var newColor = busyColor.transitionTo(finishPomodoro, ratio)
+  if (ratio > 0.5) return device.setColor(newColor)
+  else if (ratio > 0.25) {
+    device.setColor('#000000', 0x01)
+    device.setColor(newColor, 0x02)
+    device.setColor(newColor, 0x03)
+    device.setColor('#000000', 0x04)
+    device.setColor(newColor, 0x05)
+    device.setColor(newColor, 0x06)
+  } else {
+    device.setColor('#000000', 0x01)
+    device.setColor('#000000', 0x02)
+    device.setColor(newColor, 0x03)
+    device.setColor('#000000', 0x04)
+    device.setColor('#000000', 0x05)
+    device.setColor(newColor, 0x06)
+  }
+
+}
 function clickAvailable () {
   resetPomodoroMode()
   tray.setImage(AVAILABLE_ICON)
