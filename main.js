@@ -2,6 +2,9 @@ const {app, Menu, Tray} = require('electron')
 const path = require('path')
 const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
 const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
+const NEUTRAL_ICON = path.join(__dirname, 'assets/neutral.png')
+const Color = require('./color')
+const convertToSeconds = require('./time').convertToSeconds
 
 const device = require('./devices/luxafor')
 const Timer = require('time-counter')
@@ -9,6 +12,7 @@ const Timer = require('time-counter')
 const MODES = {
   AVAILABLE: 'Available',
   BUSY: 'Busy',
+  NEUTRAL: 'Neutral',
   POMODORO_START: 'Start Pomodoro',
   POMODORO_END: 'Stop Pomodoro'
 }
@@ -23,6 +27,7 @@ const setTrayMenu = (mode) => {
   const contextMenu = Menu.buildFromTemplate([
     {label: MODES.AVAILABLE, type: 'checkbox', checked: MODES.AVAILABLE === mode, click: clickAvailable},
     {label: MODES.BUSY, type: 'checkbox', checked: MODES.BUSY === mode, click: clickBusy},
+    {label: MODES.NEUTRAL, type: 'checkbox', checked: MODES.NEUTRAL === mode, click: clickNeutral},
     pomodoroLineItem,
     {type: 'separator'},
     {label: 'Settings'},
@@ -41,32 +46,65 @@ const resetPomodoroMode = () => {
 
 let tray = null
 
+const POMODORO_TIME = '25:00'
 const countDownTimer = new Timer({
   direction: 'down',
-  startValue: '25:00',
+  startValue: POMODORO_TIME,
   interval: 1000
 })
 
+var busyColor = new Color('#FF0000')
+var finishPomodoro = new Color('#ff8800')
+var availableColor = new Color('#00ff00')
+
 countDownTimer.on('change', (remainingTime) => {
   tray.setTitle(remainingTime)
-
+  setTransitionLED(remainingTime)
   if (remainingTime === '0:00') {
     clickAvailable()
   }
 })
 
+function setTransitionLED (remainingTime) {
+  var ratio = convertToSeconds(remainingTime) / convertToSeconds(POMODORO_TIME)
+  var newColor = busyColor.transitionTo(finishPomodoro, ratio)
+  if (ratio > 0.5) return device.setColor(newColor)
+  else if (ratio > 0.25) {
+    device.setColor('#000000', 0x01)
+    device.setColor(newColor, 0x02)
+    device.setColor(newColor, 0x03)
+    device.setColor('#000000', 0x04)
+    device.setColor(newColor, 0x05)
+    device.setColor(newColor, 0x06)
+  } else {
+    device.setColor('#000000', 0x01)
+    device.setColor('#000000', 0x02)
+    device.setColor(newColor, 0x03)
+    device.setColor('#000000', 0x04)
+    device.setColor('#000000', 0x05)
+    device.setColor(newColor, 0x06)
+  }
+
+}
 function clickAvailable () {
   resetPomodoroMode()
   tray.setImage(AVAILABLE_ICON)
-  device.setColor('#00ff00')
   setTrayMenu(MODES.AVAILABLE)
+  device.setColor(availableColor.value)
 }
 
 function clickBusy () {
   resetPomodoroMode()
   tray.setImage(BUSY_ICON)
-  device.setColor('#FF0000')
+  device.setColor(busyColor.value)
   setTrayMenu(MODES.BUSY)
+}
+
+function clickNeutral () {
+  resetPomodoroMode()
+  tray.setImage(NEUTRAL_ICON)
+  device.setColor('#FF0000')
+  setTrayMenu(MODES.NEUTRAL)
 }
 
 function clickStartPomodoro () {
