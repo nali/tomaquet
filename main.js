@@ -1,4 +1,5 @@
 const {app, Menu, Tray, BrowserWindow} = require('electron')
+const globalShortcut = require('./globalShortcut')
 const path = require('path')
 
 const convertToSeconds = require('./time').convertToSeconds
@@ -26,6 +27,8 @@ const COLOR_BUSY = new Color(settings.getSync('busyColor'))
 const COLOR_AVAILABLE = new Color(settings.getSync('availableColor'))
 const COLOR_FINISH = new Color(settings.getSync('finishColor'))
 const COLOR_NEUTRAL = new Color(settings.getSync('neutralColor'))
+
+let currentMode = null
 
 app.dock.hide()
 
@@ -96,6 +99,7 @@ function clickAvailable () {
   device.setColor(COLOR_AVAILABLE.value)
   tray.setImage(AVAILABLE_ICON)
   setTrayMenu(MODES.AVAILABLE)
+  currentMode = MODES.AVAILABLE
 }
 
 function clickBusy () {
@@ -103,6 +107,7 @@ function clickBusy () {
   device.setColor(COLOR_BUSY.value)
   tray.setImage(BUSY_ICON)
   setTrayMenu(MODES.BUSY)
+  currentMode = MODES.BUSY
 }
 
 function clickNeutral () {
@@ -110,6 +115,7 @@ function clickNeutral () {
   tray.setImage(NEUTRAL_ICON)
   device.setColor(COLOR_NEUTRAL.value)
   setTrayMenu(MODES.NEUTRAL)
+  currentMode = MODES.NEUTRAL
 }
 
 function clickStartPomodoro () {
@@ -132,11 +138,27 @@ function openSettings () {
   win.show()
 }
 
+function toggleStatus () {
+  if (currentMode === MODES.AVAILABLE) {
+    clickBusy()
+  } else {
+    clickAvailable()
+  }
+}
+
 app.on('ready', () => {
+  globalShortcut.register({
+    onToggle: toggleStatus,
+    onReset: clickNeutral
+  })
   tray = new Tray(AVAILABLE_ICON)
   device.initialAnimation()
   clickNeutral()
   setTrayMenu()
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregister()
 })
 
 app.on('quit', () => {
