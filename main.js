@@ -1,10 +1,13 @@
 const {app, Menu, Tray} = require('electron')
 const path = require('path')
-const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
-const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
 
 const Luxafor = require('luxafor-api')
 const Timer = require('time-counter')
+
+const settings = require('./settings')
+
+const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
+const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
 
 app.dock.hide()
 
@@ -14,7 +17,7 @@ let device = null
 
 const countDownTimer = new Timer({
   direction: 'down',
-  startValue: '25:00',
+  startValue: settings.get('defaultTime'),
   interval: 1000
 })
 
@@ -28,12 +31,12 @@ countDownTimer.on('change', (remainingTime) => {
 
 function clickAvailable () {
   tray.setImage(AVAILABLE_ICON)
-  device.setColor('#00ff00')
+  device.setColor(settings.get('availableColor'))
 }
 
 function clickBusy () {
   tray.setImage(BUSY_ICON)
-  device.setColor('#FF0000')
+  device.setColor(settings.get('busyColor'))
 }
 
 function clickStartPomodoro () {
@@ -57,6 +60,10 @@ function doInitialAnimation () {
   })
 }
 
+function openSettings () {
+  console.log('opened settings modal')
+}
+
 app.on('ready', () => {
   tray = new Tray(AVAILABLE_ICON)
   device = new Luxafor()
@@ -68,7 +75,7 @@ app.on('ready', () => {
     {label: 'Start Pomodoro', type: 'radio', click: clickStartPomodoro},
     {label: 'Stop Pomodoro', type: 'radio', click: clickStopPomodoro},
     {type: 'separator'},
-    {label: 'Settings'},
+    {label: 'Settings', click: openSettings},
     {type: 'separator'},
     {label: 'Close', role: 'quit'}
   ])
