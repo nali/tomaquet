@@ -5,6 +5,8 @@ const BUSY_ICON = 'assets/busy.png'
 const Luxafor = require('luxafor-api')
 const Timer = require('time-counter')
 
+app.dock.hide()
+
 const INITIAL_ANIMATION_SPEED = 100
 let tray = null
 let device = null
