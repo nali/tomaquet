@@ -6,7 +6,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager ./ --platform=darwin --arch=x64 --out dist"
+    "build": "electron-packager ./ --platform=darwin --arch=x64 --out dist",
+    "postinstall": "electron-rebuild --pre-gyp-fix --force"
   },
   "repository": {
     "type": "git",
@@ -21,7 +22,11 @@
   "homepage": "https://github.com/Typeform/tomaquet#readme",
   "devDependencies": {
     "electron-prebuilt": "^1.2.0",
+<<<<<<< HEAD
     "electron-packager": "^7.5.1"
+=======
+    "electron-rebuild": "^1.2.0"
+>>>>>>> 21217efd06ba15d81fc2ac3c90f31a92b6bd53f7
   },
   "dependencies": {
     "luxafor-api": "^2.0.0",
