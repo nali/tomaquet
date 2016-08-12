@@ -1,6 +1,7 @@
 const {app, Menu, Tray} = require('electron')
-const AVAILABLE_ICON = 'assets/available.png'
-const BUSY_ICON = 'assets/busy.png'
+const path = require('path')
+const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
+const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
 
 const Luxafor = require('luxafor-api')
 const Timer = require('time-counter')
