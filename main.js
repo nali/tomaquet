@@ -7,6 +7,7 @@ const device = require('./devices/luxafor')
 const Timer = require('time-counter')
 
 const settings = require('./settings')
+const Color = require('./color')
 
 const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
 const NEUTRAL_ICON = path.join(__dirname, 'assets/neutral.png')
@@ -21,9 +22,9 @@ const MODES = {
   POMODORO_END: 'Stop Pomodoro'
 }
 
-const COLOR_BUSY = settings.getSync('busyColor')
-const COLOR_AVAILABLE = settings.getSync('availableColor')
-const COLOR_FINISH = settings.getSync('availableColor')
+const COLOR_BUSY = new Color(settings.getSync('busyColor'))
+const COLOR_AVAILABLE = new Color(settings.getSync('availableColor'))
+const COLOR_FINISH = new Color(settings.getSync('availableColor'))
 
 app.dock.hide()
 
