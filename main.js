@@ -66,7 +66,7 @@ countDownTimer.on('change', (remainingTime) => {
 })
 
 function setTransitionLED (remainingTime) {
-  var ratio = convertToSeconds(remainingTime) / convertToSeconds(POMODORO_TIME)
+  var ratio = convertToSeconds(remainingTime) / convertToSeconds(settings.getSync('defaultTime'))
   var newColor = busyColor.transitionTo(finishPomodoro, ratio)
   if (ratio > 0.5) return device.setColor(newColor)
   else if (ratio > 0.25) {
