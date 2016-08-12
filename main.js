@@ -3,7 +3,7 @@ const path = require('path')
 const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
 const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
 
-const Luxafor = require('luxafor-api')
+const device = require('./devices/luxafor')
 const Timer = require('time-counter')
 
 const MODES = {
@@ -39,9 +39,7 @@ const resetPomodoroMode = () => {
   setTrayMenu(false)
 }
 
-const INITIAL_ANIMATION_SPEED = 100
 let tray = null
-let device = null
 
 const countDownTimer = new Timer({
   direction: 'down',
@@ -85,20 +83,9 @@ function clickStopPomodoro () {
   countDownTimer.stop()
 }
 
-function doInitialAnimation () {
-  const colors = ['#0000ff', '#00ff00', '#ff0000', '#0000ff', '#00ff00', '#ff0000']
-  colors.forEach((color, index) => {
-    console.log('INDEX', index)
-    setTimeout(() => {
-      device.wave(color, 1, 1, 1)
-    }, index * INITIAL_ANIMATION_SPEED)
-  })
-}
-
 app.on('ready', () => {
   tray = new Tray(AVAILABLE_ICON)
-  device = new Luxafor()
-  doInitialAnimation()
+  device.initialAnimation()
   clickAvailable()
   tray.setToolTip('No em toquis els tomaquets!')
   setTrayMenu()
