@@ -1,13 +1,18 @@
-const {app, Menu, Tray} = require('electron')
+const {app, Menu, Tray, BrowserWindow} = require('electron')
 const path = require('path')
-const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
-const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
-const NEUTRAL_ICON = path.join(__dirname, 'assets/neutral.png')
+
 const Color = require('./color')
 const convertToSeconds = require('./time').convertToSeconds
 
 const device = require('./devices/luxafor')
 const Timer = require('time-counter')
+
+const settings = require('./settings')
+
+const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
+const NEUTRAL_ICON = path.join(__dirname, 'assets/neutral.png')
+const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
+const SETTINGS_VIEW = path.join('file://', __dirname, 'views/settings.html')
 
 const MODES = {
   AVAILABLE: 'Available',
@@ -30,7 +35,7 @@ const setTrayMenu = (mode) => {
     {label: MODES.NEUTRAL, type: 'checkbox', checked: MODES.NEUTRAL === mode, click: clickNeutral},
     pomodoroLineItem,
     {type: 'separator'},
-    {label: 'Settings'},
+    {label: 'Settings', click: openSettings},
     {type: 'separator'},
     {label: 'Close', role: 'quit'}
   ])
@@ -46,16 +51,11 @@ const resetPomodoroMode = () => {
 
 let tray = null
 
-const POMODORO_TIME = '25:00'
 const countDownTimer = new Timer({
   direction: 'down',
-  startValue: POMODORO_TIME,
+  startValue: settings.getSync('defaultTime'),
   interval: 1000
 })
-
-var busyColor = new Color('#FF0000')
-var finishPomodoro = new Color('#ff8800')
-var availableColor = new Color('#00ff00')
 
 countDownTimer.on('change', (remainingTime) => {
   tray.setTitle(remainingTime)
@@ -88,22 +88,22 @@ function setTransitionLED (remainingTime) {
 }
 function clickAvailable () {
   resetPomodoroMode()
+  device.setColor(settings.getSync('availableColor').value)
   tray.setImage(AVAILABLE_ICON)
   setTrayMenu(MODES.AVAILABLE)
-  device.setColor(availableColor.value)
 }
 
 function clickBusy () {
   resetPomodoroMode()
+  device.setColor(settings.getSync('busyColor').value)
   tray.setImage(BUSY_ICON)
-  device.setColor(busyColor.value)
   setTrayMenu(MODES.BUSY)
 }
 
 function clickNeutral () {
   resetPomodoroMode()
   tray.setImage(NEUTRAL_ICON)
-  device.setColor('#FF0000')
+  device.setColor(settings.getSync('finishColor').value)
   setTrayMenu(MODES.NEUTRAL)
 }
 
@@ -121,11 +121,26 @@ function clickStopPomodoro () {
   countDownTimer.stop()
 }
 
+function doInitialAnimation () {
+  const colors = ['#0000ff', '#00ff00', '#ff0000', '#0000ff', '#00ff00', '#ff0000']
+  colors.forEach((color, index) => {
+    console.log('INDEX', index)
+    setTimeout(() => {
+      device.wave(color, 1, 1, 1)
+    }, index * INITIAL_ANIMATION_SPEED)
+  })
+}
+
+function openSettings () {
+  let win = new BrowserWindow({width: 500, height: 500, frame: false})
+  win.loadURL(SETTINGS_VIEW)
+  win.show()
+}
+
 app.on('ready', () => {
   tray = new Tray(AVAILABLE_ICON)
   device.initialAnimation()
   clickAvailable()
-  tray.setToolTip('No em toquis els tomaquets!')
   setTrayMenu()
 })
 
