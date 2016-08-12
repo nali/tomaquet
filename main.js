@@ -2,6 +2,7 @@ const {app, Menu, Tray} = require('electron')
 const path = require('path')
 const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
 const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
+const NEUTRAL_ICON = path.join(__dirname, 'assets/neutral.png')
 
 const Luxafor = require('luxafor-api')
 const Timer = require('time-counter')
@@ -9,6 +10,7 @@ const Timer = require('time-counter')
 const MODES = {
   AVAILABLE: 'Available',
   BUSY: 'Busy',
+  NEUTRAL: 'Neutral',
   POMODORO_START: 'Start Pomodoro',
   POMODORO_END: 'Stop Pomodoro'
 }
@@ -23,6 +25,7 @@ const setTrayMenu = (mode) => {
   const contextMenu = Menu.buildFromTemplate([
     {label: MODES.AVAILABLE, type: 'checkbox', checked: MODES.AVAILABLE === mode, click: clickAvailable},
     {label: MODES.BUSY, type: 'checkbox', checked: MODES.BUSY === mode, click: clickBusy},
+    {label: MODES.NEUTRAL, type: 'checkbox', checked: MODES.NEUTRAL === mode, click: clickNeutral},
     pomodoroLineItem,
     {type: 'separator'},
     {label: 'Settings'},
@@ -69,6 +72,13 @@ function clickBusy () {
   tray.setImage(BUSY_ICON)
   device.setColor('#FF0000')
   setTrayMenu(MODES.BUSY)
+}
+
+function clickNeutral () {
+  resetPomodoroMode()
+  tray.setImage(NEUTRAL_ICON)
+  device.setColor('#000000')
+  setTrayMenu(MODES.NEUTRAL)
 }
 
 function clickStartPomodoro () {
