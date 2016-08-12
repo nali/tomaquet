@@ -96,15 +96,15 @@ function clickAvailable () {
 function clickBusy () {
   resetPomodoroMode()
   tray.setImage(BUSY_ICON)
-  device.setColor('#FF0000')
+  device.setColor(busyColor.value)
   setTrayMenu(MODES.BUSY)
 }
 
 function clickNeutral () {
   resetPomodoroMode()
   tray.setImage(NEUTRAL_ICON)
+  device.setColor('#FF0000')
   setTrayMenu(MODES.NEUTRAL)
-  device.setColor(busyColor.value)
 }
 
 function clickStartPomodoro () {
