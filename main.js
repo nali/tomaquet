@@ -1,18 +1,23 @@
 const {app, Menu, Tray, BrowserWindow, remote} = require('electron')
 const path = require('path')
 
-const Luxafor = require('luxafor-api')
+const Color = require('./color')
+const convertToSeconds = require('./time').convertToSeconds
+
+const device = require('./devices/luxafor')
 const Timer = require('time-counter')
 
 const settings = require('./settings')
 
 const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
+const NEUTRAL_ICON = path.join(__dirname, 'assets/neutral.png')
 const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
 const SETTINGS_VIEW = path.join('file://', __dirname, 'views/settings.html')
 
 const MODES = {
   AVAILABLE: 'Available',
   BUSY: 'Busy',
+  NEUTRAL: 'Neutral',
   POMODORO_START: 'Start Pomodoro',
   POMODORO_END: 'Stop Pomodoro'
 }
@@ -27,6 +32,7 @@ const setTrayMenu = (mode) => {
   const contextMenu = Menu.buildFromTemplate([
     {label: MODES.AVAILABLE, type: 'checkbox', checked: MODES.AVAILABLE === mode, click: clickAvailable},
     {label: MODES.BUSY, type: 'checkbox', checked: MODES.BUSY === mode, click: clickBusy},
+    {label: MODES.NEUTRAL, type: 'checkbox', checked: MODES.NEUTRAL === mode, click: clickNeutral},
     pomodoroLineItem,
     {type: 'separator'},
     {label: 'Settings', click: openSettings},
@@ -43,9 +49,7 @@ const resetPomodoroMode = () => {
   setTrayMenu(false)
 }
 
-const INITIAL_ANIMATION_SPEED = 100
 let tray = null
-let device = null
 
 const countDownTimer = new Timer({
   direction: 'down',
@@ -55,22 +59,52 @@ const countDownTimer = new Timer({
 
 countDownTimer.on('change', (remainingTime) => {
   tray.setTitle(remainingTime)
-
+  setTransitionLED(remainingTime)
   if (remainingTime === '0:00') {
     clickAvailable()
   }
 })
 
+function setTransitionLED (remainingTime) {
+  var ratio = convertToSeconds(remainingTime) / convertToSeconds(POMODORO_TIME)
+  var newColor = busyColor.transitionTo(finishPomodoro, ratio)
+  if (ratio > 0.5) return device.setColor(newColor)
+  else if (ratio > 0.25) {
+    device.setColor('#000000', 0x01)
+    device.setColor(newColor, 0x02)
+    device.setColor(newColor, 0x03)
+    device.setColor('#000000', 0x04)
+    device.setColor(newColor, 0x05)
+    device.setColor(newColor, 0x06)
+  } else {
+    device.setColor('#000000', 0x01)
+    device.setColor('#000000', 0x02)
+    device.setColor(newColor, 0x03)
+    device.setColor('#000000', 0x04)
+    device.setColor('#000000', 0x05)
+    device.setColor(newColor, 0x06)
+  }
+
+}
 function clickAvailable () {
   resetPomodoroMode()
-  device.setColor(settings.getSync('availableColor'))
+  device.setColor(settings.getSync('availableColor').value)
+  tray.setImage(AVAILABLE_ICON)
   setTrayMenu(MODES.AVAILABLE)
 }
 
 function clickBusy () {
   resetPomodoroMode()
-  device.setColor(settings.getSync('busyColor'))
+  device.setColor(settings.getSync('busyColor').value)
+  tray.setImage(BUSY_ICON)
   setTrayMenu(MODES.BUSY)
+}
+
+function clickNeutral () {
+  resetPomodoroMode()
+  tray.setImage(NEUTRAL_ICON)
+  device.setColor(settings.getSync('finishColor').value)
+  setTrayMenu(MODES.NEUTRAL)
 }
 
 function clickStartPomodoro () {
@@ -105,8 +139,7 @@ function openSettings () {
 
 app.on('ready', () => {
   tray = new Tray(AVAILABLE_ICON)
-  device = new Luxafor()
-  doInitialAnimation()
+  device.initialAnimation()
   clickAvailable()
   setTrayMenu()
 })

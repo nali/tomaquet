@@ -1,8 +1,10 @@
 const settings = require('electron-settings')
+const Color = require('./color')
 
 settings.defaults({
-  busyColor: '#FF0000',
-  availableColor: '#00ff00',
+  busyColor: new Color('#FF0000'),
+  availableColor: new Color('#FF8800'),
+  finishColor: new Color('#00FF00'),
   defaultTime: '25:00',
   lightness: 1
 })
