@@ -6,7 +6,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager ./ --platform=darwin --arch=x64 --out dist",
+    "build": "electron-packager ./ --platform=darwin --arch=x64 --out dist --icon=assets/large_icon.icns",
     "postinstall": "electron-rebuild --pre-gyp-fix --force"
   },
   "repository": {

@@ -2,8 +2,9 @@ const settings = require('electron-settings')
 
 settings.defaults({
   busyColor: '#FF0000',
-  availableColor: '#FF8800',
-  finishColor: '#00FF00',
+  availableColor: '#00FF00',
+  finishColor: '#FF8800',
+  neutralColor: '#000000',
   defaultTime: '25:00',
   lightness: 1
 })
