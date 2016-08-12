@@ -103,7 +103,7 @@ function clickBusy () {
 function clickNeutral () {
   resetPomodoroMode()
   tray.setImage(NEUTRAL_ICON)
-  device.setColor(settings.getSync('finishColor').value)
+  device.setColor(settings.getSync('neutralColor').value)
   setTrayMenu(MODES.NEUTRAL)
 }
 
