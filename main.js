@@ -48,7 +48,7 @@ let device = null
 
 const countDownTimer = new Timer({
   direction: 'down',
-  startValue: settings.get('defaultTime'),
+  startValue: settings.getSync('defaultTime'),
   interval: 1000
 })
 
@@ -62,13 +62,13 @@ countDownTimer.on('change', (remainingTime) => {
 
 function clickAvailable () {
   resetPomodoroMode()
-  device.setColor(settings.get('availableColor'))
+  device.setColor(settings.getSync('availableColor'))
   setTrayMenu(MODES.AVAILABLE)
 }
 
 function clickBusy () {
   resetPomodoroMode()
-  device.setColor(settings.get('busyColor'))
+  device.setColor(settings.getSync('busyColor'))
   setTrayMenu(MODES.BUSY)
 }
 
