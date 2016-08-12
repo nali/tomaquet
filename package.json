@@ -4,7 +4,8 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "postinstall": "electron-rebuild --pre-gyp-fix --force"
   },
   "repository": {
     "type": "git",
@@ -23,7 +24,8 @@
   },
   "homepage": "https://github.com/electron/electron-quick-start#readme",
   "devDependencies": {
-    "electron-prebuilt": "^1.2.0"
+    "electron-prebuilt": "^1.2.0",
+    "electron-rebuild": "^1.2.0"
   },
   "dependencies": {
     "luxafor-api": "^2.0.0",
