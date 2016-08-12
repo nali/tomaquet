@@ -3,6 +3,8 @@ const path = require('path')
 const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
 const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
 const NEUTRAL_ICON = path.join(__dirname, 'assets/neutral.png')
+const Color = require('./color')
+const convertToSeconds = require('./time').convertToSeconds
 
 const device = require('./devices/luxafor')
 const Timer = require('time-counter')
@@ -44,15 +46,22 @@ const resetPomodoroMode = () => {
 
 let tray = null
 
+const POMODORO_TIME = '25:00'
 const countDownTimer = new Timer({
   direction: 'down',
-  startValue: '25:00',
+  startValue: POMODORO_TIME,
   interval: 1000
 })
 
+var busyColor = new Color('#FF0000')
+var finishPomodoro = new Color('#ff8800')
+var availableColor = new Color('#00ff00')
+
 countDownTimer.on('change', (remainingTime) => {
   tray.setTitle(remainingTime)
-
+  var ratio = convertToSeconds(remainingTime) / convertToSeconds(POMODORO_TIME)
+  var newColor = busyColor.transitionTo(finishPomodoro, ratio)
+  device.setColor(newColor)
   if (remainingTime === '0:00') {
     clickAvailable()
   }
@@ -61,8 +70,8 @@ countDownTimer.on('change', (remainingTime) => {
 function clickAvailable () {
   resetPomodoroMode()
   tray.setImage(AVAILABLE_ICON)
-  device.setColor('#00ff00')
   setTrayMenu(MODES.AVAILABLE)
+  device.setColor(availableColor.value)
 }
 
 function clickBusy () {
@@ -75,8 +84,8 @@ function clickBusy () {
 function clickNeutral () {
   resetPomodoroMode()
   tray.setImage(NEUTRAL_ICON)
-  device.setColor('#000000')
   setTrayMenu(MODES.NEUTRAL)
+  device.setColor(busyColor.value)
 }
 
 function clickStartPomodoro () {
