@@ -22,9 +22,9 @@ const MODES = {
   POMODORO_END: 'Stop Pomodoro'
 }
 
-const COLOR_BUSY = new Color(settings.getSync('busyColor'))
-const COLOR_AVAILABLE = new Color(settings.getSync('availableColor'))
-const COLOR_FINISH = new Color(settings.getSync('availableColor'))
+const COLOR_BUSY = new Color(settings.getSync('busyColor').value)
+const COLOR_AVAILABLE = new Color(settings.getSync('availableColor').value)
+const COLOR_FINISH = new Color(settings.getSync('availableColor').value)
 
 app.dock.hide()
 
