@@ -1,4 +1,4 @@
-const {app, Menu, Tray, BrowserWindow, remote} = require('electron')
+const {app, Menu, Tray, BrowserWindow} = require('electron')
 const path = require('path')
 
 const Color = require('./color')
