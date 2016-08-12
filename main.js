@@ -1,4 +1,4 @@
-const {app, Menu, Tray} = require('electron')
+const {app, Menu, Tray, BrowserWindow, remote} = require('electron')
 const path = require('path')
 
 const Luxafor = require('luxafor-api')
@@ -8,6 +8,7 @@ const settings = require('./settings')
 
 const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
 const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
+const SETTINGS_VIEW = path.join('file://', __dirname, 'views/settings.html')
 
 const MODES = {
   AVAILABLE: 'Available',
@@ -28,7 +29,7 @@ const setTrayMenu = (mode) => {
     {label: MODES.BUSY, type: 'checkbox', checked: MODES.BUSY === mode, click: clickBusy},
     pomodoroLineItem,
     {type: 'separator'},
-    {label: 'Settings'},
+    {label: 'Settings', click: openSettings},
     {type: 'separator'},
     {label: 'Close', role: 'quit'}
   ])
@@ -97,7 +98,9 @@ function doInitialAnimation () {
 }
 
 function openSettings () {
-  console.log('opened settings modal')
+  let win = new BrowserWindow({width: 500, height: 500, frame: false})
+  win.loadURL(SETTINGS_VIEW)
+  win.show()
 }
 
 app.on('ready', () => {
