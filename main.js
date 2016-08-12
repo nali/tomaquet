@@ -6,7 +6,38 @@ const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
 const Luxafor = require('luxafor-api')
 const Timer = require('time-counter')
 
+const MODES = {
+  AVAILABLE: 'Available',
+  BUSY: 'Busy',
+  POMODORO_START: 'Start Pomodoro',
+  POMODORO_END: 'Stop Pomodoro'
+}
+
 app.dock.hide()
+
+const setTrayMenu = (mode) => {
+  const pomodoroLineItem = mode === MODES.POMODORO_START
+    ? {label: MODES.POMODORO_END, type: 'checkbox', click: clickStopPomodoro}
+    : {label: MODES.POMODORO_START, type: 'checkbox', click: clickStartPomodoro}
+
+  const contextMenu = Menu.buildFromTemplate([
+    {label: MODES.AVAILABLE, type: 'checkbox', checked: MODES.AVAILABLE === mode, click: clickAvailable},
+    {label: MODES.BUSY, type: 'checkbox', checked: MODES.BUSY === mode, click: clickBusy},
+    pomodoroLineItem,
+    {type: 'separator'},
+    {label: 'Settings'},
+    {type: 'separator'},
+    {label: 'Close', role: 'quit'}
+  ])
+
+  tray.setContextMenu(contextMenu)
+}
+
+const resetPomodoroMode = () => {
+  countDownTimer.stop()
+  tray.setTitle('')
+  setTrayMenu(false)
+}
 
 const INITIAL_ANIMATION_SPEED = 100
 let tray = null
@@ -27,24 +58,31 @@ countDownTimer.on('change', (remainingTime) => {
 })
 
 function clickAvailable () {
+  resetPomodoroMode()
   tray.setImage(AVAILABLE_ICON)
   device.setColor('#00ff00')
+  setTrayMenu(MODES.AVAILABLE)
 }
 
 function clickBusy () {
+  resetPomodoroMode()
   tray.setImage(BUSY_ICON)
   device.setColor('#FF0000')
+  setTrayMenu(MODES.BUSY)
 }
 
 function clickStartPomodoro () {
+  resetPomodoroMode()
   clickBusy()
+  setTrayMenu(MODES.POMODORO_START)
   countDownTimer.start()
 }
 
 function clickStopPomodoro () {
   clickAvailable()
-  countDownTimer.stop()
   tray.setTitle('')
+  setTrayMenu(MODES.POMODORO_END)
+  countDownTimer.stop()
 }
 
 function doInitialAnimation () {
@@ -62,18 +100,8 @@ app.on('ready', () => {
   device = new Luxafor()
   doInitialAnimation()
   clickAvailable()
-  const contextMenu = Menu.buildFromTemplate([
-    {label: 'Available', type: 'radio', checked: true, click: clickAvailable},
-    {label: 'Busy', type: 'radio', click: clickBusy},
-    {label: 'Start Pomodoro', type: 'radio', click: clickStartPomodoro},
-    {label: 'Stop Pomodoro', type: 'radio', click: clickStopPomodoro},
-    {type: 'separator'},
-    {label: 'Settings'},
-    {type: 'separator'},
-    {label: 'Close', role: 'quit'}
-  ])
   tray.setToolTip('No em toquis els tomaquets!')
-  tray.setContextMenu(contextMenu)
+  setTrayMenu()
 })
 
 app.on('quit', () => {
