@@ -13,7 +13,6 @@ const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
 const NEUTRAL_ICON = path.join(__dirname, 'assets/neutral.png')
 const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
 const SETTINGS_VIEW = path.join('file://', __dirname, 'views/settings.html')
-
 const MODES = {
   AVAILABLE: 'Available',
   BUSY: 'Busy',
@@ -27,6 +26,7 @@ const COLOR_AVAILABLE = new Color(settings.getSync('availableColor'))
 const COLOR_FINISH = new Color(settings.getSync('finishColor'))
 const COLOR_NEUTRAL = new Color(settings.getSync('neutralColor'))
 
+let willQuitApp = false
 app.dock.hide()
 
 const setTrayMenu = (mode) => {
@@ -127,10 +127,31 @@ function clickStopPomodoro () {
 }
 
 function openSettings () {
-  let win = new BrowserWindow({width: 500, height: 500, frame: false})
-  win.loadURL(SETTINGS_VIEW)
-  win.show()
+  let windowSettings = new BrowserWindow({
+    width: 200,
+    height: 200,
+    frame: true,
+    minimizable: false,
+    maximizable: false,
+    resizable: false,
+    backgroundColor: '#333',
+    title: 'Tomaquet',
+    modal: true
+  })
+  windowSettings.loadURL(SETTINGS_VIEW)
+  windowSettings.show()
+  windowSettings.on('close', (e) => {
+    if (willQuitApp) {
+      windowSettings = null
+    } else {
+      /* the user only tried to close the windowSettings */
+      e.preventDefault()
+      windowSettings.hide()
+    }
+  })
 }
+
+app.on('before-quit', () => willQuitApp = true)
 
 app.on('ready', () => {
   tray = new Tray(AVAILABLE_ICON)
@@ -139,6 +160,6 @@ app.on('ready', () => {
   setTrayMenu()
 })
 
-app.on('quit', () => {
+app.on('quit', (e) => {
   device.off()
 })

@@ -21,8 +21,8 @@
   },
   "homepage": "https://github.com/Typeform/tomaquet#readme",
   "devDependencies": {
-    "electron-prebuilt": "^1.2.0",
     "electron-packager": "^7.5.1",
+    "electron-prebuilt": "^1.2.0",
     "electron-rebuild": "^1.2.0"
   },
   "dependencies": {
