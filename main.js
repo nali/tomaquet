@@ -1,30 +1,16 @@
-const {app, Menu, Tray, BrowserWindow} = require('electron')
-const path = require('path')
+const {app, Menu, Tray, BrowserWindow, ipcMain} = require('electron')
 
-const convertToSeconds = require('./time').convertToSeconds
+const MODES = require('./constants/modes')
+const ICONS = require('./constants/icons')
+const VIEWS = require('./views')
 
 const device = require('./devices/luxafor')
+
+const convertToSeconds = require('./time').convertToSeconds
 const Timer = require('time-counter')
 
 const settings = require('./settings')
-const Color = require('./color')
-
-const AVAILABLE_ICON = path.join(__dirname, 'assets/available.png')
-const NEUTRAL_ICON = path.join(__dirname, 'assets/neutral.png')
-const BUSY_ICON = path.join(__dirname, 'assets/busy.png')
-const SETTINGS_VIEW = path.join('file://', __dirname, 'views/settings.html')
-const MODES = {
-  AVAILABLE: 'Available',
-  BUSY: 'Busy',
-  NEUTRAL: 'Neutral',
-  POMODORO_START: 'Start Pomodoro',
-  POMODORO_END: 'Stop Pomodoro'
-}
-
-const COLOR_BUSY = new Color(settings.getSync('busyColor'))
-const COLOR_AVAILABLE = new Color(settings.getSync('availableColor'))
-const COLOR_FINISH = new Color(settings.getSync('finishColor'))
-const COLOR_NEUTRAL = new Color(settings.getSync('neutralColor'))
+const colors = require('./colors')
 
 let willQuitApp = false
 app.dock.hide()
@@ -72,7 +58,7 @@ countDownTimer.on('change', (remainingTime) => {
 
 function setTransitionLED (remainingTime) {
   var ratio = convertToSeconds(remainingTime) / convertToSeconds(settings.getSync('defaultTime'))
-  var newColor = COLOR_BUSY.transitionTo(COLOR_FINISH, ratio)
+  var newColor = colors.busy.transitionTo(colors.finish, ratio)
   if (ratio > 0.5) return device.setColor(newColor)
   else if (ratio > 0.25) {
     device.setColor('#000000', 0x01)
@@ -93,22 +79,22 @@ function setTransitionLED (remainingTime) {
 
 function clickAvailable () {
   resetPomodoroMode()
-  device.setColor(COLOR_AVAILABLE.value)
-  tray.setImage(AVAILABLE_ICON)
+  device.setColor(colors.available.value)
+  tray.setImage(ICONS.AVAILABLE)
   setTrayMenu(MODES.AVAILABLE)
 }
 
 function clickBusy () {
   resetPomodoroMode()
-  device.setColor(COLOR_BUSY.value)
-  tray.setImage(BUSY_ICON)
+  device.setColor(colors.busy.value)
+  tray.setImage(ICONS.BUSY)
   setTrayMenu(MODES.BUSY)
 }
 
 function clickNeutral () {
   resetPomodoroMode()
-  tray.setImage(NEUTRAL_ICON)
-  device.setColor(COLOR_NEUTRAL.value)
+  tray.setImage(ICONS.NEUTRAL)
+  device.setColor(colors.neutral.value)
   setTrayMenu(MODES.NEUTRAL)
 }
 
@@ -138,16 +124,8 @@ function openSettings () {
     title: 'Tomaquet',
     modal: true
   })
-  windowSettings.loadURL(SETTINGS_VIEW)
+  windowSettings.loadURL(VIEWS.SETTINGS)
   windowSettings.show()
-  const doc = windowSettings.webContents
-  doc.on('did-frame-finish-load', () => {
-    console.log('readyyyyy')
-
-    let colorPicker = doc
-    doc.selectAll('')
-    console.log(doc)
-  })
 
   windowSettings.on('close', (e) => {
     if (willQuitApp) {
@@ -160,10 +138,10 @@ function openSettings () {
   })
 }
 
-app.on('before-quit', () => willQuitApp = true)
+app.on('before-quit', () => { willQuitApp = true })
 
 app.on('ready', () => {
-  tray = new Tray(AVAILABLE_ICON)
+  tray = new Tray(ICONS.AVAILABLE)
   device.initialAnimation()
   clickNeutral()
   setTrayMenu()
@@ -171,4 +149,8 @@ app.on('ready', () => {
 
 app.on('quit', (e) => {
   device.off()
+})
+
+ipcMain.on('colorPicker.click', (event, data) => {
+  console.log(data)
 })
