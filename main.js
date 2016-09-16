@@ -140,6 +140,15 @@ function openSettings () {
   })
   windowSettings.loadURL(SETTINGS_VIEW)
   windowSettings.show()
+  const doc = windowSettings.webContents
+  doc.on('did-frame-finish-load', () => {
+    console.log('readyyyyy')
+
+    let colorPicker = doc
+    doc.selectAll('')
+    console.log(doc)
+  })
+
   windowSettings.on('close', (e) => {
     if (willQuitApp) {
       windowSettings = null
